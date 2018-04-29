@@ -1,13 +1,19 @@
+
+
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "SDBlockDevice.h"
 #include <stdio.h>
 #include <errno.h>
+
 /* mbed_retarget.h is included after errno.h so symbols are mapped to
  * consistent values for all toolchains */
 #include "platform/mbed_retarget.h"
 
 Serial output(USBTX, USBRX);
+Thread thread;
+DigitalOut led1(LED1);
+
 
 SDBlockDevice sd(MBED_CONF_APP_SPI_MOSI, MBED_CONF_APP_SPI_MISO, MBED_CONF_APP_SPI_CLK, MBED_CONF_APP_SPI_CS);
 FATFileSystem fs("sd", &sd);
@@ -26,10 +32,8 @@ void errno_error(void* ret_val){
     printf(" done.\r\n");
 }
 
-int main()
-{
-    output.baud(115200);
-     output.printf("\r\n\r\nConnecting...\r\n");
+void sdcard(){
+	
      
 	int error = 0;
 	printf("Welcome to the filesystem example.\r\n");
@@ -80,5 +84,22 @@ int main()
 	printf("Filesystem Demo complete.\r\n");
 
 	while (true) {}
+	
 }
+
+
+int main()
+{
+	 output.baud(115200);
+     output.printf("\r\n\r\nConnecting...\r\n");
+     thread.start(sdcard);
+     
+    while (true) {
+        led1 = !led1;
+        wait(0.5);
+    }
+
+
+}
+
 
